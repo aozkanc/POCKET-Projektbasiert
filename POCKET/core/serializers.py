@@ -4,7 +4,7 @@ from .models import Mitarbeiter, Projekt, Abrechnung, Reisebericht, Schulungskos
 class MitarbeiterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Mitarbeiter
-        fields = '__all__'  # Tüm alanları JSON'a dönüştür
+        fields = '__all__'  # Convert all fields into JSON
 
 class ProjektSerializer(serializers.ModelSerializer):
     class Meta:
