@@ -40,7 +40,7 @@ urlpatterns = [
     path('', include('core.urls')),
 ]
 
-# ✅ Admin logout için özel yönlendirme
+# Custom redirect for admin logout
 def admin_logout_redirect(request):
     return redirect('/admin/login/')
 
@@ -49,12 +49,12 @@ urlpatterns += [
 ]
 
 
-# ✅ DEBUG MODUNDA STATİK DOSYALARI SUN
+# Serve Static Files in Debug Mode
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
-# ✅ HATA SAYFALARINI YÖNLENDİR
+# REDIRECT ERROR PAGES
 from django.conf.urls import handler404, handler500, handler403
 from core import views  # core uygulamasındaki hata sayfası fonksiyonları için
 
