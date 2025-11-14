@@ -9,7 +9,7 @@ from .models import Mitarbeiter
 PASSWORD_FILE = "passwords.json"
 
 def load_passwords():
-    """JSON dosyasını yükler veya yoksa boş bir yapı oluşturur."""
+    """Loads JSON file. If it doesnn´t exist, it creates an empty structure."""
     try:
         with open(PASSWORD_FILE, "r", encoding="utf-8") as file:
             return json.load(file)
@@ -17,12 +17,12 @@ def load_passwords():
         return {"users": {}}
 
 def save_passwords(passwords):
-    """JSON dosyasına kullanıcı verilerini kaydeder."""
+    """it saves the user info in JSON file."""
     with open(PASSWORD_FILE, "w", encoding="utf-8") as file:
         json.dump(passwords, file, indent=4, ensure_ascii=False)
 
 def generate_unique_username(vorname, nachname):
-    """ Kullanıcı adı oluşturur: İsimleri '-' ile birleştirir, soyisim ile '.' kullanır. """
+    """ It creates username: connects the names with '-', uses '.' by surname. """
     base_username = f"{vorname.replace(' ', '-').lower()}.{nachname.lower()}"
     username = base_username
     counter = 1
@@ -34,7 +34,7 @@ def generate_unique_username(vorname, nachname):
     return username
 
 def generate_custom_password(vorname, nachname):
-    """ Kullanıcı için özel formatta şifre üretir: 2 harf isim + 2 harf soyisim + sembol + 3 rakam """
+    """ Generates a password in a special format for the user: 2 letter name + 2 letter surname + symbol + 3 numbers """
     symbol = random.choice("!@#$%^&*")
     numbers = ''.join(random.choices(string.digits, k=3))
     password = f"{vorname.replace(' ', '')[:2].lower()}{nachname[:2].lower()}{symbol}{numbers}"
@@ -42,7 +42,7 @@ def generate_custom_password(vorname, nachname):
 
 @receiver(post_save, sender=Mitarbeiter)
 def create_user_for_mitarbeiter(sender, instance, created, **kwargs):
-    """ Yeni bir çalışan oluşturulduğunda otomatik kullanıcı ve şifre oluşturur. """
+    """ Automatically creates a user and password when a new employee is created. """
     passwords = load_passwords()
 
     if created and not instance.user:
@@ -50,7 +50,7 @@ def create_user_for_mitarbeiter(sender, instance, created, **kwargs):
         raw_password = generate_custom_password(instance.vorname, instance.nachname)
 
         user = User.objects.create(username=username)
-        user.set_password(raw_password)  # Django'nun kendi hashleme sistemini kullanarak şifreyi saklar
+        user.set_password(raw_password)  # Stores the password using Django's own hashing system
         user.save()
 
         instance.user = user
@@ -59,12 +59,12 @@ def create_user_for_mitarbeiter(sender, instance, created, **kwargs):
         group = Group.objects.get(name=instance.rolle)
         user.groups.add(group)
 
-        # 🔹 JSON dosyasına sadece OLUŞTURULAN İLK ŞİFREYİ kaydet
+        # 🔹 Save only the INITIAL PASSWORD GENERATED to the JSON file
         passwords["users"][username] = {
-            "password_plain": raw_password,  # Sadece ilk oluşturulan şifreyi kaydediyoruz
+            "password_plain": raw_password,  # Only the first password generated is saved
             "created_at": user.date_joined.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         save_passwords(passwords)
 
-        print(f"✅ Kullanıcı '{username}' oluşturuldu. İlk şifresi: {raw_password}")
+        print(f"Username '{username}' has been generated. First password: {raw_password}")
