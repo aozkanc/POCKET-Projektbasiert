@@ -19,7 +19,7 @@ router.register(r'einnahmen', EinnahmeViewSet)
 
 
 urlpatterns = [
-    path('', include(router.urls)),  # API Router'ı ekli
+    path('', include(router.urls)),  # API Router is added
 ]
 
 from django.contrib.auth.views import (
@@ -35,6 +35,6 @@ urlpatterns = [
     path('password_change_done/', PasswordChangeDoneView.as_view(template_name='auth/password_change_done.html'), name='password_change_done'),
 
 
-    path('profil/', profil_view, name="profil"),  # Profil sayfası
+    path('profil/', profil_view, name="profil"),  # Profile page
 ]
 
