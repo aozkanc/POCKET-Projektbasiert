@@ -8,8 +8,8 @@ from simple_history.models import HistoricalRecords
 
 @receiver(post_save, sender=User)
 def benutzerprofil_erstellen(sender, instance, created, **kwargs):
-    if created:  # Yeni bir kullanıcı oluşturulduğunda çalışır
-        from core.models import BenutzerProfil  # ✅ Modeli burada import et
+    if created:  # Works when a new user is created
+        from core.models import BenutzerProfil  # Import the modal here
         BenutzerProfil.objects.create(benutzer=instance)
 
 
