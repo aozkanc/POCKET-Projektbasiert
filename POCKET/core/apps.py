@@ -6,4 +6,4 @@ class CoreConfig(AppConfig):
     name = 'core'
 
     def ready(self):
-        import core.signals  # Signals dosyasını bağla
+        import core.signals  # Connect signals file
