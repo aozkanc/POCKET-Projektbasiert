@@ -2,10 +2,10 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 from .models import BenutzerProfil, Abrechnung, Mitarbeiter, Projekt, Reisebericht, Schulungskosten, Abordnung, Einnahme
 
-# 📌 BenutzerProfil için geçmişi admin panelinde göster
+# Show history for BenutzerProfil in admin panel
 @admin.register(BenutzerProfil)
 class BenutzerProfilAdmin(SimpleHistoryAdmin):
-    list_display = ("benutzer", "profil_bild")  # ✅ Sadece profil bilgisi kaldı
+    list_display = ("benutzer", "profil_bild")
     search_fields = ("benutzer__username",)
 
 
