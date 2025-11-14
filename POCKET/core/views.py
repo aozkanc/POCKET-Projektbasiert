@@ -22,7 +22,7 @@ import csv
 class CustomObtainAuthToken(ObtainAuthToken):
     pass
 
-# ✅ API ViewSets (Bunları Değiştirmiyoruz)
+# API ViewSets (Don´t change!)
 class MitarbeiterViewSet(viewsets.ModelViewSet):
     queryset = Mitarbeiter.objects.all()
     serializer_class = MitarbeiterSerializer
@@ -51,7 +51,7 @@ class AbordnungViewSet(viewsets.ModelViewSet):
     queryset = Abordnung.objects.all()
     serializer_class = AbordnungSerializer
 
-# ✅ Giriş Ekranı (Django Template ile Login)
+# Login Page (Django Template)
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -60,7 +60,7 @@ def login_view(request):
 
         if user:
             login(request, user)
-            if user.is_superuser:  # 🚀 Eğer admin ise admin dashboard'a yönlendir
+            if user.is_superuser:  # If admin, redirect to admin dashboard
                 return redirect("admin_dashboard")
             elif user.groups.filter(name="Manager").exists():
                 return redirect("manager_dashboard")
@@ -79,7 +79,7 @@ from django.db.models import Sum, Q
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_dashboard_view(request):
-    # 🔢 Genel toplam sayılar (sadece projeye bağlı olanlar)
+    # Grand total numbers (project-related only)
     total_projekte = Projekt.objects.count()
     total_mitarbeiter = Mitarbeiter.objects.count()
     total_abordnungen = Abordnung.objects.count()
@@ -87,7 +87,7 @@ def admin_dashboard_view(request):
     total_schulungen = Schulungskosten.objects.filter(projekt__isnull=False).count()
     total_abrechnungen = Abrechnung.objects.filter(projekt__isnull=False).count()
 
-    # 💸 Gider hesapları (SADECE proje bağlantılı veriler)
+    # Expense accounts (project-related data ONLY)
     total_abrechnung = Abrechnung.objects.filter(projekt__isnull=False).aggregate(s=Sum("brutto_summe"))["s"] or 0
     total_reise = Reisebericht.objects.filter(projekt__isnull=False).aggregate(s=Sum("kosten_fahrt"))["s"] or 0
     total_hotel = Reisebericht.objects.filter(projekt__isnull=False).aggregate(s=Sum("kosten_übernachtung"))["s"] or 0
@@ -95,30 +95,27 @@ def admin_dashboard_view(request):
 
     total_kosten = total_abrechnung + total_reise + total_hotel + total_schulung
 
-    # 💰 Gelir (zaten proje bağlı)
+    # Income
     total_einnahmen = Einnahme.objects.aggregate(s=Sum("betrag"))["s"] or 0
     total_einnahmen_count = Einnahme.objects.count()
 
-    # 💹 Kar
+    # Profit
     nettogewinn = total_einnahmen - total_kosten
 
-    # 📊 Grafik: Einnahmen vs Kosten
+    # Graphic: Einnahmen vs Kosten
     einnahme_vs_kosten_data = {
         "Einnahmen": float(total_einnahmen),
         "Kosten": float(total_kosten),
     }
 
-    # 📊 Grafik: Gider Kategorileri
+    # Graphic: Expense Categories
     category_data = {
         "Abrechnung": float(total_abrechnung),
         "Reise": float(total_reise + total_hotel),
         "Schulung": float(total_schulung),
     }
 
-    # 🔁 Artık "allgemeine_kosten" yok!
-    # "projekt_vs_allgemein_data" gibi grafiklere gerek yok
-
-    # 📦 Template'e gönderilecek context
+    # Context to be sent to the template
     context = {
         "total_projekte": total_projekte,
         "total_mitarbeiter": total_mitarbeiter,
@@ -146,26 +143,26 @@ def export_finanzuebersicht(request):
     writer = csv.writer(response)
     writer.writerow(['Kategorie', 'Betrag (€)'])
 
-    # 🔢 Verileri getir
+    # Fetch data
     abrechnung = Abrechnung.objects.all()
     reisen = Reisebericht.objects.all()
     schulungen = Schulungskosten.objects.all()
     einnahmen_qs = Einnahme.objects.all()
 
-    # 💸 Giderler
+    # Expenses
     total_abrechnung = abrechnung.aggregate(s=Sum('brutto_summe'))['s'] or 0
     total_reise = reisen.aggregate(s=Sum('kosten_fahrt'))['s'] or 0
     total_hotel = reisen.aggregate(s=Sum('kosten_übernachtung'))['s'] or 0
     total_schulung = schulungen.aggregate(s=Sum('kosten'))['s'] or 0
     total_kosten = total_abrechnung + total_reise + total_hotel + total_schulung
 
-    # 💰 Gelir
+    # Income
     total_einnahmen = einnahmen_qs.aggregate(s=Sum('betrag'))['s'] or 0
 
-    # 📈 Net kar
+    # Net profit
     nettogewinn = total_einnahmen - total_kosten
 
-    # 📤 CSV satırları
+    # CSV rows
     writer.writerow(['Abrechnung', f"{total_abrechnung:.2f}"])
     writer.writerow(['Reise (Fahrt + Hotel)', f"{(total_reise + total_hotel):.2f}"])
     writer.writerow(['Schulung', f"{total_schulung:.2f}"])
@@ -193,7 +190,7 @@ def admin_projekte_view(request):
 
         if projektname and startdatum and enddatum and budget and kunde_1 and projekttyp and status:
             if edit_id:
-                # 🔄 Güncelleme
+                # Update
                 projekt = get_object_or_404(Projekt, id=edit_id)
                 projekt.projektname = projektname
                 projekt.startdatum = startdatum
@@ -207,7 +204,7 @@ def admin_projekte_view(request):
                 projekt.save()
                 messages.success(request, "✅ Projekt wurde aktualisiert.")
             else:
-                # ➕ Yeni Kayıt
+                # new record
                 Projekt.objects.create(
                     projektname=projektname,
                     startdatum=startdatum,
@@ -225,7 +222,7 @@ def admin_projekte_view(request):
 
         return redirect("admin_projekte")
 
-    # ✅ GET (Listeleme ve Filtreleme)
+    # ✅ GET (Listing and Filtering)
     projekte = Projekt.objects.all()
 
     projektname = request.GET.get("projektname")
@@ -245,7 +242,7 @@ def admin_projekte_view(request):
     if status:
         projekte = projekte.filter(status__icontains=status)
 
-    # Sayfalama
+    # Pagination
     paginator = Paginator(projekte, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -255,7 +252,7 @@ def admin_projekte_view(request):
     })
 
 
-# ✅ Projekt Silme
+# Deleting Project
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_projekt_delete(request, id):
@@ -265,7 +262,7 @@ def admin_projekt_delete(request, id):
     return redirect("admin_projekte")
 
 
-# ✅ Projekt Export
+# Project Export
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def export_projekte(request):
@@ -278,7 +275,7 @@ def export_projekte(request):
 
     projekte = Projekt.objects.all()
 
-    # Filtreleme
+    # Filtering
     projektname = request.GET.get("projektname")
     kunde_1 = request.GET.get("kunde")
     startdatum = request.GET.get("start")
@@ -315,7 +312,7 @@ def admin_einnahmen_view(request):
     einnahmen = Einnahme.objects.select_related("projekt").all()
     projekte = Projekt.objects.all()
 
-    # 🔍 Filtreleme
+    # Filtering
     projekt_id = request.GET.get("projekt_id")
     start = request.GET.get("start")
     end = request.GET.get("end")
@@ -330,12 +327,12 @@ def admin_einnahmen_view(request):
     if status:
         einnahmen = einnahmen.filter(status=status)
 
-    # 📄 Sayfalama
+    # Pagination
     paginator = Paginator(einnahmen.order_by("-zahlungseingang"), 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # ➕ / ✏️ Ekleme veya Güncelleme
+    # Add or Update
     if request.method == "POST":
         data = request.POST
         edit_id = data.get("edit_id")
@@ -383,7 +380,7 @@ def export_einnahmen(request):
 
     einnahmen = Einnahme.objects.select_related("projekt").all()
 
-    # 🔍 Filtre uygulama
+    # Applying filter
     projekt_id = request.GET.get("projekt_id")
     start = request.GET.get("start")
     end = request.GET.get("end")
@@ -427,7 +424,7 @@ def admin_mitarbeiter_view(request):
 
         if vorname and nachname and standort and erste_taetigkeitsstaette and abteilung and status and rolle:
             if edit_id:
-                # 🔄 Güncelleme
+                # Update
                 m = get_object_or_404(Mitarbeiter, id=edit_id)
                 m.vorname = vorname
                 m.nachname = nachname
@@ -439,7 +436,7 @@ def admin_mitarbeiter_view(request):
                 m.save()
                 messages.success(request, "✅ Mitarbeiter wurde aktualisiert.")
             else:
-                # ➕ Yeni kayıt
+                # New record
                 Mitarbeiter.objects.create(
                     vorname=vorname,
                     nachname=nachname,
@@ -455,7 +452,7 @@ def admin_mitarbeiter_view(request):
 
         return redirect("admin_mitarbeiter")
 
-    # ✅ GET: Listeleme + filtre
+    # GET: Listing + filtering
     mitarbeiter = Mitarbeiter.objects.all()
     vorname = request.GET.get("vorname")
     nachname = request.GET.get("nachname")
@@ -483,7 +480,7 @@ def admin_mitarbeiter_view(request):
     })
 
 
-# ✅ Silme
+# Delete
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_mitarbeiter_delete(request, id):
@@ -493,7 +490,7 @@ def admin_mitarbeiter_delete(request, id):
     return redirect("admin_mitarbeiter")
 
 
-# ✅ CSV Export (filtreli)
+# CSV Export (filtered)
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def export_mitarbeiter(request):
@@ -506,7 +503,7 @@ def export_mitarbeiter(request):
 
     mitarbeiter = Mitarbeiter.objects.all()
 
-    # Filtreler
+    # Filters
     vorname = request.GET.get("vorname")
     nachname = request.GET.get("nachname")
     rolle = request.GET.get("rolle")
@@ -580,7 +577,7 @@ def admin_projektmitarbeiter_delete(request, id):
 
 
 
-# Abordnung Yönetimi
+# Abordnung
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_abordnung_view(request):
@@ -588,7 +585,7 @@ def admin_abordnung_view(request):
     mitarbeiter = Mitarbeiter.objects.all()
     abordnungen = filter_abordnungen(request)
 
-    # Sayfalama
+    # Pagination
     paginator = Paginator(abordnungen, 10)  # Sayfa başına 10 öğe
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -602,7 +599,7 @@ def admin_abordnung_view(request):
 
         if projekt_id and mitarbeiter_id and zeitraum_start and zeitraum_ende:
             if edit_id:
-                # 🔄 GÜNCELLEME MODU
+                # Update
                 eintrag = get_object_or_404(Abordnung, id=edit_id)
                 eintrag.projekt_id = projekt_id
                 eintrag.mitarbeiter_id = mitarbeiter_id
@@ -611,7 +608,7 @@ def admin_abordnung_view(request):
                 eintrag.save()
                 messages.success(request, "✅ Abordnung wurde aktualisiert.")
             else:
-                # ➕ YENİ EKLEME MODU
+                # New Record
                 overlap_exists = Abordnung.objects.filter(
                     projekt_id=projekt_id,
                     mitarbeiter_id=mitarbeiter_id,
@@ -640,7 +637,7 @@ def admin_abordnung_view(request):
         "mitarbeiter": mitarbeiter,
     })
 
-# Abordnung Silme
+# Delete Abordnung
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_abordnung_delete(request, id):
@@ -649,7 +646,7 @@ def admin_abordnung_delete(request, id):
     messages.success(request, "🗑️ Abordnung wurde gelöscht.")
     return redirect("admin_abordnung")
 
-# Filtreleme fonksiyonu
+# Filtering
 def filter_abordnungen(request):
     queryset = Abordnung.objects.select_related("projekt", "mitarbeiter")
     projekt_id = request.GET.get("projekt_id")
@@ -668,7 +665,7 @@ def filter_abordnungen(request):
 
     return queryset
 
-# Export Fonksiyonu
+# Export
 def export_abordnung(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="abordnungen.csv"'
@@ -679,7 +676,7 @@ def export_abordnung(request):
 
     queryset = Abordnung.objects.select_related('projekt', 'mitarbeiter')
 
-    # Filtreleri uygula
+    # Filtering
     projekt_id = request.GET.get("projekt_id")
     mitarbeiter_id = request.GET.get("mitarbeiter_id")
     start = request.GET.get("start")
@@ -694,7 +691,7 @@ def export_abordnung(request):
     if end:
         queryset = queryset.filter(zeitraum_ende__lte=end)
 
-    # CSV yazma
+    # CSV
     for ab in queryset:
         writer.writerow([
             ab.projekt.projektname,
@@ -829,7 +826,7 @@ def admin_schulungskosten_view(request):
     mitarbeiter = Mitarbeiter.objects.all()
     projekte = Projekt.objects.all()
 
-    # 🔎 Filtreleme
+    # Filtering
     schulungen = Schulungskosten.objects.select_related("mitarbeiter", "projekt").all()
     mitarbeiter_id = request.GET.get("mitarbeiter_id")
     teilgenommen = request.GET.get("teilgenommen")
@@ -845,12 +842,12 @@ def admin_schulungskosten_view(request):
     if end:
         schulungen = schulungen.filter(datum_ende__lte=end)
 
-    # 📄 Sayfalama
+    # Pagination
     paginator = Paginator(schulungen.order_by("-datum_start"), 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # ➕ / ✏️ Ekleme veya Güncelleme
+    # Add or Update
     if request.method == "POST":
         data = request.POST
         edit_id = data.get("edit_id")
@@ -897,7 +894,7 @@ def export_schulungskosten(request):
 
     queryset = Schulungskosten.objects.select_related('mitarbeiter')
 
-    # Filtre uygula
+    # Apply Filter
     mitarbeiter_id = request.GET.get("mitarbeiter_id")
     teilgenommen = request.GET.get("teilgenommen")
     start = request.GET.get("start")
@@ -933,7 +930,7 @@ def admin_abrechnung_view(request):
     mitarbeiter = Mitarbeiter.objects.all()
     abrechnungen = Abrechnung.objects.select_related("mitarbeiter", "projekt").all()
 
-    # 🔍 Filtreleme
+    # Filtering
     monat = request.GET.get("monat")
     mitarbeiter_id = request.GET.get("mitarbeiter_id")
     projekt_id = request.GET.get("projekt_id")
@@ -948,12 +945,12 @@ def admin_abrechnung_view(request):
     if status:
         abrechnungen = abrechnungen.filter(rechnung_status=status)
 
-    # Sayfalama
+    # Pagination
     paginator = Paginator(abrechnungen, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # 🔁 POST: Ekleme veya Güncelleme
+    # POST: Add or Update
     if request.method == "POST":
         edit_id = request.POST.get("edit_id")
         monat = request.POST.get("monat")
@@ -980,7 +977,7 @@ def admin_abrechnung_view(request):
 
         if monat and mitarbeiter_id and stunden and stundensatz:
             if edit_id:
-                # GÜNCELLEME
+                # UPDATE
                 abrechnung = get_object_or_404(Abrechnung, id=edit_id)
                 abrechnung.monat = monat
                 abrechnung.mitarbeiter_id = mitarbeiter_id
@@ -996,7 +993,7 @@ def admin_abrechnung_view(request):
                 abrechnung.save()
                 messages.success(request, "✅ Abrechnung wurde aktualisiert.")
             else:
-                # EKLEME
+                # ADD
                 Abrechnung.objects.create(
                     monat=monat,
                     mitarbeiter_id=mitarbeiter_id,
@@ -1023,7 +1020,7 @@ def admin_abrechnung_view(request):
     })
 
 
-# 🗑️ Silme
+# DELETE
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def admin_abrechnung_delete(request, id):
