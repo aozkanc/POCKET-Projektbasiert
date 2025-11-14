@@ -2,17 +2,17 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# ✅ STATIC DOSYA AYARLARI
+# STATIC FILE SETTINGS
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # Statik dosyaların bulunduğu dizin
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Django'nun topladığı statik dosyaların kaydedildiği dizin
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]  # Directory containing static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Directory where static files collected by Django are saved
 
 
 SECRET_KEY = 'django-insecure-sy)$lg)q)s71#(-!me*f25(u-e-8yqmsl=i!a1d(lcjp0(3rkq'
 
-DEBUG = True  # Test ortamı için True, Production'da False yap
+DEBUG = True  # for Testing True, make it false in Production
 
-ALLOWED_HOSTS = ["*"]  # Docker için açık bırakıyoruz
+ALLOWED_HOSTS = ["*"]  # open for Docker
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -21,8 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  # 🔥 Django REST Framework
-    'core',  # Ana uygulama
+    'rest_framework',  # Django REST Framework
+    'core',  # Main application
 ]
 
 
@@ -34,7 +34,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
     {
-        'NAME': 'core.validators.CustomPasswordValidator',  # 🚀 Sadece özel şifre doğrulayıcıyı kullan
+        'NAME': 'core.validators.CustomPasswordValidator',  # Use special password validator only
     },
 ]
 
@@ -42,20 +42,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',  # ✅ Hata mesajında eklenmesi istenmiş
+    'django.contrib.sessions.middleware.SessionMiddleware',  # for error message
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',  # ✅ Hata mesajında eklenmesi istenmiş
-    'django.contrib.messages.middleware.MessageMiddleware',  # ✅ Hata mesajında eklenmesi istenmiş
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # for error message
+    'django.contrib.messages.middleware.MessageMiddleware',  # for error message
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 
-# 📌 **TEMPLATE AYARLARI**
+# **TEMPLATE SETTINGS**
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # ✅ Güncellendi!
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Updated!
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-# 📌 **DATABASE (MySQL)**
+# **DATABASE (MySQL)**
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -80,15 +80,15 @@ DATABASES = {
     }
 }
 
-# 📌 **DİĞER AYARLAR**
+# **OTHER SETTINGS**
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Europe/Berlin'  # Almanya zaman dilimi
+TIME_ZONE = 'Europe/Berlin'  # Germany time zone
 USE_I18N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-ROOT_URLCONF = 'backend.urls'  # Eğer backend klasörün ana URL'leri içeriyorsa
+ROOT_URLCONF = 'backend.urls'  # If backend file contains the main urls
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
